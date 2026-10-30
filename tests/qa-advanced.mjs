@@ -1,10 +1,14 @@
 import puppeteer from 'puppeteer-core';
-const browser = await puppeteer.launch({ executablePath:'/Applications/Google Chrome.app/Contents/MacOS/Google Chrome', headless:'new', args:['--no-sandbox','--hide-scrollbars','--allow-file-access-from-files'] });
+
+const CHROME = process.env.CHROME_PATH || '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
+const BASE_URL = process.env.TIANGONG_URL || 'http://127.0.0.1:4173/';
+const FILE_URL = new URL('../index.html', import.meta.url).href;
+const browser = await puppeteer.launch({ executablePath:CHROME, headless:'new', args:['--no-sandbox','--hide-scrollbars','--allow-file-access-from-files'] });
 const page = await browser.newPage(); await page.setViewport({width:1440,height:900,deviceScaleFactor:1});
 const errors=[]; page.on('pageerror',e=>errors.push('PE '+e.message)); page.on('console',m=>{if(m.type()==='error'&&!m.text().includes('favicon')) errors.push('CE '+m.text());});
 const results=[]; const check=(n,ok,d='')=>{results.push({n,ok:!!ok,d}); if(!ok) console.log('FAIL',n,d);};
 const wait=ms=>new Promise(r=>setTimeout(r,ms));
-await page.goto('http://127.0.0.1:4173/',{waitUntil:'domcontentloaded'}); await wait(17000);
+await page.goto(BASE_URL,{waitUntil:'domcontentloaded'}); await wait(17000);
 await page.evaluate(()=>document.getElementById('welcome-overlay').hidden=true);
 // solar mechanics
 await page.click('#mode-mechanism'); await wait(800);
@@ -85,7 +89,7 @@ await page.click('#btn-quality'); await wait(300);
 // file protocol load
 const page2=await browser.newPage(); await page2.setViewport({width:1280,height:800,deviceScaleFactor:1});
 const ferr=[]; page2.on('pageerror',e=>ferr.push(e.message)); page2.on('console',m=>{if(m.type()==='error'&&!m.text().includes('favicon')) ferr.push(m.text());});
-const fileUrl='file:///Volumes/ZHITAI/%E4%B8%AD%E5%9B%BD%E8%88%AA%E5%A4%A9%E7%AB%99/index.html';
+const fileUrl=FILE_URL;
 await page2.goto(fileUrl,{waitUntil:'domcontentloaded',timeout:30000}); await wait(12000);
 const fileInfo=await page2.evaluate(()=>({boot:document.getElementById('boot').className,ready:!!window.__tiangong?._bootReady,canvas:!!document.querySelector('#canvas-container canvas'),err:window.__tiangong?null :'app not booted'}));
 check('file:// runs standalone', fileInfo.ready && fileInfo.canvas, JSON.stringify(fileInfo));
@@ -93,7 +97,7 @@ check('file:// no errors', ferr.length===0, ferr.join(' | '));
 // fresh mobile load
 const page3=await browser.newPage(); await page3.setViewport({width:390,height:844,deviceScaleFactor:1,isMobile:true,hasTouch:true});
 const merr=[]; page3.on('pageerror',e=>merr.push(e.message));
-await page3.goto('http://127.0.0.1:4173/',{waitUntil:'domcontentloaded'}); await wait(17000);
+await page3.goto(BASE_URL,{waitUntil:'domcontentloaded'}); await wait(17000);
 await page3.screenshot({path:'/tmp/qa2-mobile-fresh-welcome.png'});
 await page3.evaluate(()=>document.getElementById('welcome-overlay').hidden=true); await wait(900);
 const m1=await page3.evaluate(()=>({overflow:document.documentElement.scrollWidth>innerWidth, stage:document.getElementById('stage').getBoundingClientRect().toJSON(), canvas:document.querySelector('#canvas-container canvas').getBoundingClientRect().toJSON(), consoleH:document.getElementById('console').getBoundingClientRect().height}));

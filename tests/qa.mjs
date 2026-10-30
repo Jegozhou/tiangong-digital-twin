@@ -1,13 +1,16 @@
 import puppeteer from 'puppeteer-core';
 import fs from 'node:fs';
-const browser = await puppeteer.launch({ executablePath:'/Applications/Google Chrome.app/Contents/MacOS/Google Chrome', headless:'new', args:['--no-sandbox','--hide-scrollbars'] });
+
+const CHROME = process.env.CHROME_PATH || '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
+const BASE_URL = process.env.TIANGONG_URL || 'http://127.0.0.1:4173/';
+const browser = await puppeteer.launch({ executablePath:CHROME, headless:'new', args:['--no-sandbox','--hide-scrollbars'] });
 const page = await browser.newPage(); await page.setViewport({width:1440,height:900,deviceScaleFactor:1});
 const errors=[]; page.on('pageerror',e=>errors.push('PAGEERROR '+e.message)); page.on('console',m=>{if(m.type()==='error' && !m.text().includes('favicon')) errors.push('CONSOLE '+m.text());});
 const results=[]; const check=(name,ok,detail='')=>{results.push({name,ok:!!ok,detail}); if(!ok) console.log('FAIL',name,detail);};
 const wait=ms=>new Promise(r=>setTimeout(r,ms));
 async function click(sel){ try{ await page.click(sel); return true;}catch(e){ check('click '+sel,false,e.message); return false; } }
 async function state(){ return page.evaluate(()=>({mode:document.body.dataset.mode, theme:document.documentElement.classList.contains('theme-light')?'light':'dark', selected:window.__tiangong?.state?.selectedId, welcomeHidden:document.getElementById('welcome-overlay')?.hidden, detailEmpty:!document.getElementById('detail-empty')?.hidden, sys:!document.getElementById('system-hud').hidden})); function hudVisible(id){return !document.getElementById(id).hidden;} }
-await page.goto('http://127.0.0.1:4173/',{waitUntil:'domcontentloaded'});
+await page.goto(BASE_URL,{waitUntil:'domcontentloaded'});
 await wait(18000);
 let s=await state();
 check('boot completed', await page.evaluate(()=>document.getElementById('boot').classList.contains('is-done')));
