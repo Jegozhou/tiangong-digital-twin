@@ -1,0 +1,17 @@
+{
+  "name": "tiangong-explorer",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node build.mjs",
+    "dev": "node server.mjs"
+  },
+  "dependencies": {
+    "@fontsource/barlow-condensed": "^5.1.0",
+    "@fontsource/ibm-plex-mono": "^5.1.0",
+    "esbuild": "^0.24.0",
+    "puppeteer-core": "^23.11.1",
+    "three": "^0.169.0"
+  }
+}
