@@ -1,17 +1,21 @@
 {
-  "name": "tiangong-explorer",
+  "name": "tiangong-digital-twin",
   "version": "1.0.0",
   "private": true,
   "type": "module",
   "scripts": {
     "build": "node build.mjs",
-    "dev": "node server.mjs"
+    "dev": "node server.mjs",
+    "start": "node server.mjs"
   },
   "dependencies": {
-    "@fontsource/barlow-condensed": "^5.1.0",
-    "@fontsource/ibm-plex-mono": "^5.1.0",
+    "three": "^0.169.0"
+  },
+  "description": "天宫 · 中国空间站数字孪生与结构探索系统 — 程序化 Three.js 交互展项",
+  "devDependencies": {
     "esbuild": "^0.24.0",
     "puppeteer-core": "^23.11.1",
-    "three": "^0.169.0"
+    "@fontsource/barlow-condensed": "^5.1.0",
+    "@fontsource/ibm-plex-mono": "^5.1.0"
   }
 }
