@@ -4,6 +4,10 @@
 
 一个基于原生 HTML / CSS / JavaScript 与 Three.js 的中国空间站交互式三维数字孪生展项。三舱 T 字构型、六套柔性太阳翼、两套七自由度机械臂、多级结构拆解、在轨组装时间轴与轨道观察，全部由程序化几何实时构建，不加载任何外部 3D 模型文件。
 
+**在线体验：** <https://jegozhou.github.io/tiangong-digital-twin/>
+
+**GitHub 仓库：** <https://github.com/Jegozhou/tiangong-digital-twin>
+
 ![总览](screenshots/01-overview.png)
 
 ## 运行
