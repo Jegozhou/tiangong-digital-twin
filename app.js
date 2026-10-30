@@ -26258,6 +26258,17 @@ void main() {
     const frameMat = metal(trim);
     const platform = new Group();
     platform.position.z = 0.45;
+    for (const sx of [-1, 1]) for (const sz of [-1, 1]) {
+      g.add(mesh(cylGeo(0.042, 0.052, 0.46, 8), frameMat, {
+        pos: [sx * width * 0.33, sz * length * 0.3, 0.23],
+        rot: [Math.PI / 2, 0, 0]
+      }));
+      g.add(mesh(boxGeo(0.12, 0.12, 0.035), frameMat, {
+        pos: [sx * width * 0.33, sz * length * 0.3, 0.02]
+      }));
+    }
+    g.add(mesh(boxGeo(width * 0.82, length * 0.64, 0.035), frameMat, { pos: [0, 0, 0.02] }));
+    g.add(mesh(cylGeo(0.07, 0.07, 0.18, 10), gold, { pos: [0, 0, 0.12], rot: [Math.PI / 2, 0, 0] }));
     for (const sx of [-1, 1]) {
       for (const sz of [-1, 1]) {
         platform.add(mesh(boxGeo(0.055, 0.055, length), frameMat, { pos: [sx * width / 2, 0, sz * length / 2] }));
@@ -26294,7 +26305,10 @@ void main() {
   function addDeployablePlatform(parent, { theta = 0, z = 0, radius = 2.1, material, trim }) {
     const g = new Group();
     orientOnCylinder(g, theta, z, radius, 0.02);
-    const hinge = mesh(cylGeo(0.07, 0.07, 0.6, 10), metal(trim), { rot: [0, 0, Math.PI / 2] });
+    g.add(mesh(roundedBoxGeo(1, 0.5, 0.06, 0.02), metal(trim), { pos: [0, 0, 0.01] }));
+    g.add(mesh(roundedBoxGeo(0.7, 0.3, 0.18, 0.02), metal(trim), { pos: [0, 0, 0.1] }));
+    const hinge = mesh(cylGeo(0.07, 0.07, 0.9, 10), metal(trim), { rot: [0, 0, Math.PI / 2] });
+    hinge.position.z = 0.18;
     g.add(hinge);
     for (const side of [-1, 1]) {
       const arm = new Group();
@@ -26302,6 +26316,9 @@ void main() {
       arm.position.x = side * 0.35;
       const panel = mesh(boxGeo(1.25, 0.05, 1.55), material, { pos: [side * 0.62, 0, 0.42] });
       arm.add(panel);
+      arm.add(cylinderBetween(new Vector3(0, 0, 0), new Vector3(side * 0.18, 0, 0.4), 0.03, metal(trim), 8));
+      arm.add(cylinderBetween(new Vector3(0, 0, 0), new Vector3(side * 0.86, 0, 0.4), 0.026, metal(trim), 8));
+      arm.add(mesh(cylGeo(0.055, 0.055, 0.28, 9), metal(trim), { pos: [side * 0.35, 0, 0.35], rot: [Math.PI / 2, 0, 0] }));
       for (let i = 0; i < 3; i++) {
         arm.add(mesh(boxGeo(1.2, 0.035, 0.03), metal(trim), { pos: [side * 0.62, 0, 0.05 + i * 0.4] }));
       }
@@ -28320,20 +28337,67 @@ void main() {
     wrapper.position.copy(position);
     wrapper.rotation.y = rotationY;
     parent.add(wrapper);
-    const boomDir = side;
-    const boom = mesh(cylGeo(0.075, 0.09, 1.05, 10), materials.metal, {
-      pos: [boomDir * 0.05, 0, 0],
-      rot: [0, 0, Math.PI / 2]
-    });
-    boom.rotation.z = 0;
-    boom.position.set(-boomDir * 0.45, 0, 0);
-    wrapper.add(boom);
-    for (const sy of [-1, 1]) {
-      wrapper.add(mesh(cylGeo(0.022, 0.026, 0.55, 8), materials.metalDark, {
-        pos: [-boomDir * 0.5, sy * 0.24, 0],
-        rot: [0, 0, Math.PI / 2 + sy * 0.25]
+    const sx = Math.sign(position.x) || 1;
+    const supportY = position.y;
+    const supportZ = position.z;
+    const hullX = sx * 1.36;
+    const rootX = sx * 2.4;
+    const support = new Group();
+    support.name = `solar-array-support-${side > 0 ? "A" : "B"}`;
+    parent.add(support);
+    support.add(mesh(boxGeo(0.16, 0.62, 0.9), materials.metalDark, {
+      pos: [sx * 1.4, supportY, supportZ],
+      rot: [0, 0, 0]
+    }));
+    support.add(mesh(roundedBoxGeo(0.055, 0.44, 0.66, 0.02), materials.gold, {
+      pos: [sx * 1.475, supportY, supportZ]
+    }));
+    for (const zy of [-0.28, 0.28]) {
+      support.add(mesh(cylGeo(0.024, 0.024, 0.055, 8), materials.metal, {
+        pos: [sx * 1.5, supportY + zy, supportZ],
+        rot: [0, 0, Math.PI / 2]
       }));
     }
+    const hubMidX = sx * ((Math.abs(hullX) + Math.abs(rootX)) / 2);
+    support.add(mesh(cylGeo(0.13, 0.17, Math.abs(rootX - hullX), 14), materials.metal, {
+      pos: [hubMidX, supportY, supportZ],
+      rot: [0, 0, Math.PI / 2]
+    }));
+    for (const dz of [-0.35, 0.35]) {
+      support.add(cylinderBetween(
+        new Vector3(hullX, supportY + 0.03, supportZ + dz * 0.82),
+        new Vector3(rootX, supportY + 0.05, supportZ + dz),
+        0.032,
+        materials.metalDark,
+        8
+      ));
+    }
+    for (const dz of [-0.42, 0.42]) {
+      support.add(cylinderBetween(
+        new Vector3(hullX, supportY + 0.28, supportZ + dz),
+        new Vector3(rootX, supportY - 0.12, supportZ + dz * 0.6),
+        0.026,
+        materials.metal,
+        8
+      ));
+    }
+    support.add(mesh(boxGeo(0.32, 0.5, 0.6), materials.metalDark, {
+      pos: [rootX + sx * 0.03, supportY, supportZ]
+    }));
+    support.add(mesh(cylGeo(0.24, 0.24, 0.16, 20), materials.metal, {
+      pos: [rootX + sx * 0.04, supportY, supportZ],
+      rot: [0, 0, Math.PI / 2]
+    }));
+    support.add(mesh(torusGeo(0.245, 0.022, 6, 24), materials.gold, {
+      pos: [rootX + sx * 0.02, supportY, supportZ],
+      rot: [0, Math.PI / 2, 0]
+    }));
+    support.add(tubeAlong([
+      [sx * 1.47, supportY - 0.24, supportZ + 0.16],
+      [sx * 1.85, supportY - 0.27, supportZ + 0.22],
+      [sx * 2.18, supportY - 0.14, supportZ + 0.18],
+      [rootX - sx * 0.12, supportY - 0.05, supportZ + 0.12]
+    ], 0.012, materials.carbon, 18));
     const wingRoot = new Group();
     wingRoot.rotation.y = 0;
     wingRoot.add(wingFactory.group);
@@ -28561,6 +28625,8 @@ void main() {
     armMount.position.set(0, 1.52, 4.2);
     armMount.rotation.set(0, -0.45, -0.2);
     living.add(armMount);
+    living.add(mesh(cylGeo(0.24, 0.3, 0.18, 16), materials.metalDark, { pos: [0, 1.41, 4.2] }));
+    living.add(mesh(torusGeo(0.27, 0.025, 6, 24), materials.metal, { pos: [0, 1.5, 4.2], rot: [Math.PI / 2, 0, 0] }));
     const armAnchor = new Object3D();
     armAnchor.position.set(2.5, 1.4, 0);
     armMount.add(armAnchor);
@@ -28779,6 +28845,9 @@ void main() {
       smallArmMount.position.set(0.9, 1.58, 12.75);
       smallArmMount.rotation.set(0, 0.2, 0.3);
       airlock.add(smallArmMount);
+      const smallHull = new Vector3(0.8, 1.41, 12.75);
+      airlock.add(cylinderBetween(smallHull, new Vector3(0.9, 1.58, 12.75), 0.16, materials.metalDark, 12));
+      airlock.add(mesh(roundedBoxGeo(0.36, 0.08, 0.36, 0.015), materials.metal, { pos: [0.82, 1.43, 12.75] }));
       const armAnchor = new Object3D();
       armAnchor.position.set(1.2, 1.2, 0);
       smallArmMount.add(armAnchor);

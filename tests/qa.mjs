@@ -34,6 +34,27 @@ const search=await page.evaluate(()=>({visible:[...document.querySelectorAll('#t
 check('search filters tree', search.visible>0 && search.empty===true, JSON.stringify(search));
 await page.evaluate(()=>{const i=document.getElementById('tree-search'); i.value=''; i.dispatchEvent(new Event('input',{bubbles:true}));});
 await wait(300);
+// structural attachment audit: all six solar wings must have a support bridge
+const supportAudit = await page.evaluate(()=>{
+  const a=window.__tiangong;
+  return [...a.station.solarWings.values()].map(w=>{
+    const siblings=w.wrapper.parent?.children||[];
+    const supports=siblings.filter(c=>String(c.name||'').startsWith('solar-array-support'));
+    const V=a.sceneManager.camera.position.constructor;
+    const wp=w.wrapper.getWorldPosition(new V());
+    let match=null;
+    for(const sup of supports){
+      const box=new a.station.bounds.constructor(); box.expandByObject(sup);
+      if(box.containsPoint(wp)) { match=sup; break; }
+    }
+    return {id:w.id, supports:supports.length, support: matchesSupportName(w), overlapsRoot:!!match, parentChildren:siblings.length};
+    function matchesSupportName(wing){
+      const want=(wing.id.endsWith('-b')||wing.id.endsWith('-solar-b'))?'solar-array-support-B':'solar-array-support-A';
+      return supports.some(c=>c.name===want);
+    }
+  });
+});
+check('all six solar wings structurally supported', supportAudit.length===6 && supportAudit.every(x=>x.supports>=2&&x.support&&x.overlapsRoot), JSON.stringify(supportAudit));
 // systems
 await click('.seg-tab[data-tree-tab="systems"]'); await wait(300);
 await click('.system-chip[data-system="power"]'); await wait(1100);

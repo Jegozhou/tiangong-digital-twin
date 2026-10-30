@@ -514,6 +514,17 @@ export function addExperimentPlatform(parent, {
   const frameMat = metal(trim);
   const platform = new THREE.Group();
   platform.position.z = 0.45;
+  // support posts and base plate tying the exposed deck back to the hull
+  for (const sx of [-1, 1]) for (const sz of [-1, 1]) {
+    g.add(mesh(cylGeo(0.042, 0.052, 0.46, 8), frameMat, {
+      pos: [sx * width * 0.33, sz * length * 0.3, 0.23], rot: [Math.PI / 2, 0, 0]
+    }));
+    g.add(mesh(boxGeo(0.12, 0.12, 0.035), frameMat, {
+      pos: [sx * width * 0.33, sz * length * 0.3, 0.02]
+    }));
+  }
+  g.add(mesh(boxGeo(width * 0.82, length * 0.64, 0.035), frameMat, { pos: [0, 0, 0.02] }));
+  g.add(mesh(cylGeo(0.07, 0.07, 0.18, 10), gold, { pos: [0, 0, 0.12], rot: [Math.PI / 2, 0, 0] }));
   // main truss frame
   for (const sx of [-1, 1]) {
     for (const sz of [-1, 1]) {
@@ -556,7 +567,11 @@ export function addExperimentPlatform(parent, {
 export function addDeployablePlatform(parent, { theta = 0, z = 0, radius = 2.1, material, trim }) {
   const g = new THREE.Group();
   orientOnCylinder(g, theta, z, radius, 0.02);
-  const hinge = mesh(cylGeo(0.07, 0.07, 0.6, 10), metal(trim), { rot: [0, 0, Math.PI / 2] });
+  // hull interface pad + hinge barrel
+  g.add(mesh(roundedBoxGeo(1.0, 0.5, 0.06, 0.02), metal(trim), { pos: [0, 0, 0.01] }));
+  g.add(mesh(roundedBoxGeo(0.7, 0.3, 0.18, 0.02), metal(trim), { pos: [0, 0, 0.1] }));
+  const hinge = mesh(cylGeo(0.07, 0.07, 0.9, 10), metal(trim), { rot: [0, 0, Math.PI / 2] });
+  hinge.position.z = 0.18;
   g.add(hinge);
   for (const side of [-1, 1]) {
     const arm = new THREE.Group();
@@ -564,6 +579,10 @@ export function addDeployablePlatform(parent, { theta = 0, z = 0, radius = 2.1, 
     arm.position.x = side * 0.35;
     const panel = mesh(boxGeo(1.25, 0.05, 1.55), material, { pos: [side * 0.62, 0, 0.42] });
     arm.add(panel);
+    // hinge scissors and stand-off brackets (visible connection to the hull pad)
+    arm.add(cylinderBetween(new THREE.Vector3(0, 0, 0), new THREE.Vector3(side * 0.18, 0, 0.4), 0.03, metal(trim), 8));
+    arm.add(cylinderBetween(new THREE.Vector3(0, 0, 0), new THREE.Vector3(side * 0.86, 0, 0.4), 0.026, metal(trim), 8));
+    arm.add(mesh(cylGeo(0.055, 0.055, 0.28, 9), metal(trim), { pos: [side * 0.35, 0, 0.35], rot: [Math.PI / 2, 0, 0] }));
     for (let i = 0; i < 3; i++) {
       arm.add(mesh(boxGeo(1.2, 0.035, 0.03), metal(trim), { pos: [side * 0.62, 0, 0.05 + i * 0.4] }));
     }
