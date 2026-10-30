@@ -65,7 +65,7 @@ export class UIManager {
       'annotation-layer', 'annotation-lines', 'annotation-labels', 'toast-area', 'stage-loading',
       'detail-empty', 'detail-content', 'overview-stats', 'btn-quick-tour', 'detail-breadcrumb', 'detail-index',
       'detail-category', 'detail-accuracy', 'detail-name', 'detail-english', 'detail-summary', 'detail-desc',
-      'detail-function', 'detail-specs', 'detail-structure', 'detail-relations', 'detail-refs', 'detail-model-note',
+      'detail-function', 'detail-specs', 'detail-structure', 'detail-model-dims-section', 'detail-model-dims', 'detail-relations', 'detail-refs', 'detail-model-note',
       'btn-focus', 'btn-explode-part', 'console', 'console-toggle', 'ctx-mechanism', 'ctx-overview', 'explode-slider', 'explode-value',
       'explode-level-label', 'btn-explode-prev', 'btn-explode-play', 'btn-explode-next', 'btn-explode-selected',
       'btn-explode-reset', 'btn-explode-all', 'solar-select', 'btn-solar-deploy', 'btn-solar-retract', 'btn-solar-pause',
@@ -485,6 +485,20 @@ export class UIManager {
       }
     } else {
       specs.innerHTML = '<div class="spec-row"><span class="spec-label">公开参数</span><span class="spec-value">公开资料未确认</span><span class="spec-tag">—</span></div>';
+    }
+    // model bounding-geometry dimensions (explicitly not engineering data)
+    const md = c.modelDimensions;
+    const mdSection = this.els['detail-model-dims-section'];
+    const mdWrap = this.els['detail-model-dims'];
+    if (md && mdSection && mdWrap) {
+      const unit = md.unit || 'm';
+      mdWrap.innerHTML = ['x', 'y', 'z']
+        .filter((k) => typeof md[k] === 'number')
+        .map((k) => `<span class="model-dim"><b>${md[k]}</b><small>${unit}</small><i>${k.toUpperCase()}</i></span>`)
+        .join('');
+      mdSection.hidden = mdWrap.children.length === 0;
+    } else if (mdSection) {
+      mdSection.hidden = true;
     }
     // structure
     const st = this.els['detail-structure'];

@@ -30620,6 +30620,8 @@ void main() {
         "detail-function",
         "detail-specs",
         "detail-structure",
+        "detail-model-dims-section",
+        "detail-model-dims",
         "detail-relations",
         "detail-refs",
         "detail-model-note",
@@ -31138,6 +31140,16 @@ void main() {
         }
       } else {
         specs.innerHTML = '<div class="spec-row"><span class="spec-label">\u516C\u5F00\u53C2\u6570</span><span class="spec-value">\u516C\u5F00\u8D44\u6599\u672A\u786E\u8BA4</span><span class="spec-tag">\u2014</span></div>';
+      }
+      const md = c.modelDimensions;
+      const mdSection = this.els["detail-model-dims-section"];
+      const mdWrap = this.els["detail-model-dims"];
+      if (md && mdSection && mdWrap) {
+        const unit = md.unit || "m";
+        mdWrap.innerHTML = ["x", "y", "z"].filter((k) => typeof md[k] === "number").map((k) => `<span class="model-dim"><b>${md[k]}</b><small>${unit}</small><i>${k.toUpperCase()}</i></span>`).join("");
+        mdSection.hidden = mdWrap.children.length === 0;
+      } else if (mdSection) {
+        mdSection.hidden = true;
       }
       const st = this.els["detail-structure"];
       st.innerHTML = "";

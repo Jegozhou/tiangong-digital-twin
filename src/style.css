@@ -995,3 +995,12 @@ html.theme-light .welcome-card { background: linear-gradient(150deg, rgba(250, 2
 .system-tree-desc { margin: -1px 0 7px 25px; font-size: 8.5px; line-height: 1.55; color: var(--text-3); border-left: 1px solid var(--line); padding-left: 8px; }
 .tree-system-list { margin-top: 12px; border-top: 1px solid var(--line); padding-top: 9px; display: flex; flex-direction: column; gap: 1px; }
 .tree-sector-title { display: block; font-family: var(--font-mono); font-size: 7px; letter-spacing: .12em; color: var(--text-3); padding: 0 5px 5px; }
+
+
+/* model bounding dimensions in dossier */
+.model-dims { display: flex; gap: 5px; margin: 2px 0 2px; }
+.model-dim { display: flex; align-items: baseline; gap: 3px; border: 1px solid var(--line); padding: 3px 6px; background: var(--input-bg); }
+.model-dim b { font-family: var(--font-cond); font-size: 17px; font-weight: 500; color: var(--text-2); line-height: 1; }
+.model-dim small { font-family: var(--font-mono); font-size: 7px; color: var(--text-3); }
+.model-dim i { font-style: normal; font-family: var(--font-mono); font-size: 6px; color: var(--accent); opacity: .65; margin-left: 2px; }
+.model-dims-note { font-size: 8px; line-height: 1.5; color: var(--text-3); margin-top: 5px; }
